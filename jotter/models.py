@@ -6,18 +6,17 @@ class Context(models.Model):
     prompt = models.CharField(max_length=200)
     instructions = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    classes = models.ManyToManyField('PupilClass', blank=True)
 
     def __str__(self):
         return self.title
     
 class PupilClass(models.Model):
     name = models.CharField(max_length=100)
-    teacher = models.ForeignKey(User, related_name='teacher', on_delete=models.CASCADE)
+    teacher = models.ForeignKey(User, related_name='classes_taught', on_delete=models.CASCADE)
     year_group = models.CharField(max_length=30)
-    access_key = models.UUIDField()
-    pupils = models.ManyToManyField(User, related_name='pupils')
-    contexts = models.ManyToManyField(Context, blank=True)
+    access_key = models.CharField(max_length=8)
+    pupils = models.ManyToManyField(User, related_name='pupil_classes')
+    contexts = models.ManyToManyField(Context, related_name='assigned_classes', blank=True)
 
     def __str__(self):
         return self.name
