@@ -108,6 +108,9 @@ class PupilClassSerializer(serializers.ModelSerializer):
         return pupil_class
         
 class JotterSerializer(serializers.ModelSerializer):
+    author = PupilUserSerializer(read_only=True)
+    context = ContextSerializer(read_only=True)
+
     class Meta:
         model = Jotter
         fields = '__all__'

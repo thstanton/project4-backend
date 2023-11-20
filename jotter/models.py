@@ -27,7 +27,7 @@ class Image(models.Model):
 
 class Jotter(models.Model):
     context = models.ForeignKey(Context, on_delete=models.CASCADE)
-    body = models.TextField()
+    body = models.TextField(blank=True, null=True)
     complete = models.BooleanField(default=False)
     author = models.ForeignKey(User, related_name='owned_jotters', on_delete=models.CASCADE)
 

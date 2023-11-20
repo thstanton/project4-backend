@@ -1,9 +1,8 @@
-from rest_framework import permissions, generics
+from rest_framework import permissions, generics, status
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from django.db.models import Subquery, OuterRef
 
 from .serializers import *
 from .models import *
@@ -45,7 +44,7 @@ class ListContexts(generics.ListAPIView):
         user = self.request.user
         return Context.objects.filter(author=user)
 
-# ?     
+# ? Show all contexts assigned to a particular pupil    
 class AssignedContextsView(generics.ListAPIView):
     serializer_class = ContextSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -59,14 +58,6 @@ class AssignedContextsView(generics.ListAPIView):
 
         # Get the Contexts assigned to those PupilClasses
         contexts = Context.objects.filter(assigned_classes__in=pupil_classes)
-
-        # Exclude Contexts where the user has created a Jotter for that context
-        jotter_exists_subquery = Jotter.objects.filter(
-            context=OuterRef('pk'),
-            author=user
-        ).exists()
-
-        contexts = contexts.exclude(id__in=Subquery(jotter_exists_subquery))
 
         return contexts
 
@@ -148,6 +139,16 @@ class CreateJotter(generics.CreateAPIView):
     queryset = Jotter.objects.all()
     serializer_class = JotterSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Extract context_id from the request data
+        context_id = self.request.data.get('context')
+
+        # Fetch the Context instance based on the provided context_id
+        context_instance = Context.objects.get(pk=context_id)
+
+        # Set the author from the request's user and the fetched context
+        serializer.save(author=self.request.user, context=context_instance, complete=False)
 
 class SingleJotter(generics.RetrieveUpdateDestroyAPIView):
     queryset = Jotter.objects.all()

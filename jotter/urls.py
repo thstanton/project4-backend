@@ -23,7 +23,7 @@ urlpatterns = [
     path('class/<int:class_id>/remove/<int:pupil_id>/', views.remove_from_class),
     path('class/pupil/', views.AssignedContextsView.as_view()),
     # Jotter Endpoints
-    path('jotter/<int:context_id>/create/', views.CreateJotter.as_view()),
+    path('jotter/create/', views.CreateJotter.as_view()),
     path('jotter/<int:pk>/', views.SingleJotter.as_view()),
     path('jotter/incomplete/', views.ListOwnIncompleteJotters.as_view()),
     path('jotter/complete/', views.ListOwnCompleteJotters.as_view()),
