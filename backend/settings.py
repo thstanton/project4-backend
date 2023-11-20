@@ -33,7 +33,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'jotter',
-    'jwt_auth',
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',

@@ -3,10 +3,15 @@ from django.contrib.auth.models import User, Group
 from .models import Context, WordBank, Word, Jotter, Image, PupilClass
 import uuid
 
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = '__all__'
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['id', 'username', 'first_name', 'last_name', 'groups']
 
     # Add users to the pupil or teacher group when account created
     def create(self, validated_data):
@@ -19,7 +24,12 @@ class UserSerializer(serializers.ModelSerializer):
         user.groups.add(group)
 
         return user
-
+    
+class PupilUserSerializer(serializers.ModelSerializer):
+    pupil_classes = 'PupilClassSerializer(many=True)'
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'pupil_classes', 'groups']
 
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,10 +53,11 @@ class ContextSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     wordbanks = WordBankSerializer(many=True)
     images = ImageSerializer(many=True)
+    assigned_classes = 'PupilClassSerializer(many=True)'
 
     class Meta:
         model = Context
-        fields = ['title', 'prompt', 'instructions', 'author', 'wordbanks', 'images']
+        fields = ['id', 'title', 'prompt', 'instructions', 'author', 'wordbanks', 'images', 'assigned_classes']
 
     def create(self, validated_data):
         wordbanks_data = validated_data.pop('wordbanks', [])
@@ -80,7 +91,7 @@ class ContextSerializer(serializers.ModelSerializer):
 
 class PupilClassSerializer(serializers.ModelSerializer):
     teacher = UserSerializer(read_only=True)
-    pupils = UserSerializer(many=True, read_only=True)
+    pupils = PupilUserSerializer(many=True, read_only=True)
     contexts = ContextSerializer(many=True, read_only=True)
 
     class Meta:

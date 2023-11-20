@@ -29,7 +29,7 @@ class Jotter(models.Model):
     context = models.ForeignKey(Context, on_delete=models.CASCADE)
     body = models.TextField()
     complete = models.BooleanField(default=False)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, related_name='owned_jotters', on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.context}, {self.author}"

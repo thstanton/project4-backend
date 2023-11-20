@@ -1,8 +1,9 @@
-from rest_framework import authentication, permissions, generics, status
+from rest_framework import permissions, generics
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from django.db.models import Subquery, OuterRef
 
 from .serializers import *
 from .models import *
@@ -12,8 +13,7 @@ from .models import *
 class ListUsers(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
 class CreateUser(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -22,6 +22,17 @@ class CreateUser(generics.CreateAPIView):
 class EditUser(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class SelfUser(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        print(user)
+        return User.objects.filter(username=user)
 
 # ! Context-related Views
 
@@ -33,6 +44,31 @@ class ListContexts(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Context.objects.filter(author=user)
+
+# ?     
+class AssignedContextsView(generics.ListAPIView):
+    serializer_class = ContextSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Extract user from the request
+        user = self.request.user
+
+        # Get the PupilClasses associated with the user
+        pupil_classes = PupilClass.objects.filter(pupils=user)
+
+        # Get the Contexts assigned to those PupilClasses
+        contexts = Context.objects.filter(assigned_classes__in=pupil_classes)
+
+        # Exclude Contexts where the user has created a Jotter for that context
+        jotter_exists_subquery = Jotter.objects.filter(
+            context=OuterRef('pk'),
+            author=user
+        ).exists()
+
+        contexts = contexts.exclude(id__in=Subquery(jotter_exists_subquery))
+
+        return contexts
 
 # ? GET - Context detail view (PK), PUT - Edit (Title, Prompt, Instructions only), DELETE - delete context (PK)   
 class ContextDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -52,15 +88,17 @@ class CreateContext(generics.CreateAPIView):
 # ? Assign/Unassign a context to/from a class
 @api_view(['POST'])
 def assoc_class_add(request, context_id, class_id):
-    PupilClass.objects.get(id=class_id).contexts.add(context_id)
-    return Response({ "message": f"Context {context_id} assigned to class {class_id}" }).status_code(201)
+    pupil_class = PupilClass.objects.get(id=class_id)
+    pupil_class.contexts.add(context_id)
+    return Response({ "message": f"Context {Context.objects.get(id=context_id)} assigned to class {pupil_class}" })
 
 @api_view(['DELETE'])
 def assoc_class_remove(request, context_id, class_id):
-    PupilClass.objects.get(id=class_id).contexts.remove(context_id)
-    return Response({ "message": f"Context {context_id} unassigned to class {class_id}" }).status_code(202)
+    pupil_class = PupilClass.objects.get(id=class_id)
+    pupil_class.contexts.remove(context_id)
+    return Response({ "message": f"Context {Context.objects.get(id=context_id)} unassigned to class {pupil_class}" })
 
-# ! Word and WordBank-Related Views
+# ! Word, WordBank & Image-Related Views
 
 class WordBank(generics.RetrieveUpdateDestroyAPIView):
     queryset = WordBank.objects.all()
@@ -70,6 +108,11 @@ class WordBank(generics.RetrieveUpdateDestroyAPIView):
 class SingleWord(generics.RetrieveUpdateDestroyAPIView):
     queryset = Word.objects.all()
     serializer_class = WordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class SingleImage(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Word.objects.all()
+    serializer_class = ImageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 # ! Class-Related Views
@@ -119,7 +162,7 @@ class ListOwnIncompleteJotters(generics.ListAPIView):
         user = self.request.user
         return Jotter.objects.filter(author=user, complete=False)
     
-class ListOwnIncompleteJotters(generics.ListAPIView):
+class ListOwnCompleteJotters(generics.ListAPIView):
     serializer_class = JotterSerializer
     permission_classes = [permissions.IsAuthenticated]
 
