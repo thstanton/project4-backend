@@ -3,15 +3,29 @@ from django.contrib.auth.models import User, Group
 from .models import Context, WordBank, Word, Jotter, Image, PupilClass
 import uuid
 
+class NestedTeacherUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name']
+
+class NestedPupilClassSerializer(serializers.ModelSerializer):
+    teacher = NestedTeacherUserSerializer(read_only=True)
+
+    class Meta:
+        model = PupilClass
+        fields = ['name', 'teacher', 'year_group']
+
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
+    pupil_classes = NestedPupilClassSerializer(many=True, read_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'groups']
+        fields = ['id', 'username', 'first_name', 'last_name', 'groups', 'pupil_classes']
 
     # Add users to the pupil or teacher group when account created
     def create(self, validated_data):
@@ -53,7 +67,7 @@ class ContextSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     wordbanks = WordBankSerializer(many=True)
     images = ImageSerializer(many=True)
-    assigned_classes = 'PupilClassSerializer(many=True)'
+    assigned_classes = NestedPupilClassSerializer(many=True)
 
     class Meta:
         model = Context

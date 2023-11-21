@@ -59,6 +59,10 @@ class AssignedContextsView(generics.ListAPIView):
         # Get the Contexts assigned to those PupilClasses
         contexts = Context.objects.filter(assigned_classes__in=pupil_classes)
 
+        # Exclude Contexts for which the user has already created a Jotter
+        jotter_contexts = Jotter.objects.filter(author=user).values_list('context', flat=True)
+        contexts = contexts.exclude(id__in=jotter_contexts)
+
         return contexts
 
 # ? GET - Context detail view (PK), PUT - Edit (Title, Prompt, Instructions only), DELETE - delete context (PK)   
