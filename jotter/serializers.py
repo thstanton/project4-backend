@@ -34,12 +34,12 @@ class UserSerializer(serializers.ModelSerializer):
     # Add users to the pupil or teacher group when account created
     def create(self, validated_data):
         group_id = self.context['request'].parser_context['kwargs']['group_id']
-
+        password = validated_data.pop('password')
         user = super().create(validated_data)
-
         group = Group.objects.get(id=group_id)
         user.groups.add(group)
-
+        user.set_password(password)
+        user.save()
         return user
     
 class PupilUserSerializer(serializers.ModelSerializer):
@@ -51,7 +51,7 @@ class PupilUserSerializer(serializers.ModelSerializer):
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
-        fields = ['word']
+        fields = ['id', 'word']
 
 class WordBankSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=100)
@@ -59,7 +59,7 @@ class WordBankSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WordBank
-        fields = ['title', 'words']
+        fields = ['id', 'title', 'words']
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -68,9 +68,9 @@ class ImageSerializer(serializers.ModelSerializer):
     
 class ContextSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
-    wordbanks = WordBankSerializer(many=True)
-    images = ImageSerializer(many=True)
-    assigned_classes = NestedPupilClassSerializer(many=True)
+    wordbanks = WordBankSerializer(many=True, read_only=True)
+    images = ImageSerializer(many=True, read_only=True)
+    assigned_classes = NestedPupilClassSerializer(many=True, read_only=True)
 
     class Meta:
         model = Context

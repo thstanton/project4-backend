@@ -36,7 +36,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'project4-backend-production.up.railway.app',
-    'project4-backend.railway.internal'
+    'project4-backend.railway.internal',
+    'localhost'
 ]
 
 
@@ -192,6 +193,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
-    "https://project4-frontend-production.up.railway.app/",
+    "https://project4-frontend-production.up.railway.app",
     "http://localhost:3000"
 ]
