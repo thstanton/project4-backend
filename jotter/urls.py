@@ -13,8 +13,12 @@ urlpatterns = [
     path('contexts/<int:pk>/', views.ContextDetail.as_view()),
     path('contexts/<int:context_id>/assign/<int:class_id>/', views.assoc_class_add),
     path('contexts/<int:context_id>/unassign/<int:class_id>/', views.assoc_class_remove),
+    # Word, Word Bank and Image Endpoints
+    path('contexts/word/createlist/', views.WordListCreate.as_view()),
     path('contexts/word/<int:pk>/', views.SingleWord.as_view()),
+    path('contexts/wordbank/create/', views.CreateWordBank.as_view()),
     path('contexts/wordbank/<int:pk>/', views.WordBank.as_view()),
+    path('contexts/image/create/', views.CreateImage.as_view()),
     path('contexts/image/<int:pk>/', views.SingleImage.as_view()),
     # Class Endpoints
     path('class/create/', views.CreatePupilClass.as_view()),

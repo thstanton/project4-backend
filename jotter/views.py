@@ -94,15 +94,34 @@ def assoc_class_remove(request, context_id, class_id):
     return Response({ "message": f"Context {Context.objects.get(id=context_id)} unassigned to class {pupil_class}" })
 
 # ! Word, WordBank & Image-Related Views
+class CreateWordBank(generics.CreateAPIView):
+    queryset = WordBank.objects.all()
+    serializer_class = WordBankSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 class WordBank(generics.RetrieveUpdateDestroyAPIView):
     queryset = WordBank.objects.all()
     serializer_class = WordBankSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+class WordListCreate(generics.ListCreateAPIView):
+    queryset = Word.objects.all()
+    serializer_class = WordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return WordListSerializer
+        return WordSerializer
+
 class SingleWord(generics.RetrieveUpdateDestroyAPIView):
     queryset = Word.objects.all()
     serializer_class = WordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class CreateImage(generics.CreateAPIView):
+    queryset = Word.objects.all()
+    serializer_class = ImageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 class SingleImage(generics.RetrieveUpdateDestroyAPIView):

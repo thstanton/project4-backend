@@ -51,20 +51,23 @@ class PupilUserSerializer(serializers.ModelSerializer):
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
-        fields = ['id', 'word']
+        fields = '__all__'
+
+class WordListSerializer(serializers.ListSerializer):
+    child = WordSerializer()
 
 class WordBankSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=100)
-    words = WordSerializer(many=True)
+    words = WordSerializer(many=True, read_only=True)
 
     class Meta:
         model = WordBank
-        fields = ['id', 'title', 'words']
+        fields = '__all__'
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ['url']
+        fields = '__all__'
     
 class ContextSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
@@ -75,36 +78,14 @@ class ContextSerializer(serializers.ModelSerializer):
     class Meta:
         model = Context
         fields = ['id', 'title', 'prompt', 'instructions', 'author', 'wordbanks', 'images', 'assigned_classes']
-
-    def create(self, validated_data):
-        wordbanks_data = validated_data.pop('wordbanks', [])
-        images_data = validated_data.pop('images', [])
-
-        context = Context.objects.create(**validated_data)
-
-        for wordbank_data in wordbanks_data:
-            words_data = wordbank_data.pop('words', [])
-            new_wordbank = WordBank.objects.create(context=context, **wordbank_data)
-
-            for word_data in words_data:
-                word_value = word_data['word']
-                try:
-                    Word.objects.create(word_bank=new_wordbank, word=word_value)
-                except Exception as e:
-                    print(f"Error creating Word: {e}")
-
-        for image_data in images_data:
-            Image.objects.create(context=context, url=image_data['url'])
-
-        return context
     
-    def update(self, instance, validated_data):
-        instance.title = validated_data.get('title', instance.title)
-        instance.prompt = validated_data.get('prompt', instance.prompt)
-        instance.instructions = validated_data.get('instructions', instance.instructions)
+    # def update(self, instance, validated_data):
+    #     instance.title = validated_data.get('title', instance.title)
+    #     instance.prompt = validated_data.get('prompt', instance.prompt)
+    #     instance.instructions = validated_data.get('instructions', instance.instructions)
 
-        instance.save()
-        return instance
+    #     instance.save()
+    #     return instance
 
 class PupilClassSerializer(serializers.ModelSerializer):
     teacher = UserSerializer(read_only=True)
