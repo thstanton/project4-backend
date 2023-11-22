@@ -193,4 +193,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
     "https://project4-frontend-production.up.railway.app/",
+    "http://localhost:3000"
 ]
