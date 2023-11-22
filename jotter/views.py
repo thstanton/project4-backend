@@ -18,6 +18,19 @@ class CreateUser(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    def create(self, request, *args, **kwargs):
+        try:
+            # Call the parent class's create method
+            response = super().create(request, *args, **kwargs)
+        except serializers.ValidationError as e:
+            # Handle validation errors
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Handle other exceptions
+            return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return response
+
 class EditUser(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer

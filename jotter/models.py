@@ -15,7 +15,7 @@ class PupilClass(models.Model):
     teacher = models.ForeignKey(User, related_name='classes_taught', on_delete=models.CASCADE)
     year_group = models.CharField(max_length=30)
     access_key = models.CharField(max_length=8)
-    pupils = models.ManyToManyField(User, related_name='pupil_classes')
+    pupils = models.ManyToManyField(User, blank=True, related_name='pupil_classes')
     contexts = models.ManyToManyField(Context, related_name='assigned_classes', blank=True)
 
     def __str__(self):

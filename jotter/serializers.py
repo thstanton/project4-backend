@@ -25,14 +25,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'groups', 'pupil_classes']
+        fields = ['id', 'username', 'first_name', 'last_name', 'groups', 'pupil_classes', 'email', 'password']
+    
+    extra_kwargs = {
+        'password': {'write_only': True},
+    }
 
     # Add users to the pupil or teacher group when account created
     def create(self, validated_data):
         group_id = self.context['request'].parser_context['kwargs']['group_id']
-        print(group_id)
 
-        user = super(UserSerializer, self).create(validated_data)
+        user = super().create(validated_data)
 
         group = Group.objects.get(id=group_id)
         user.groups.add(group)
