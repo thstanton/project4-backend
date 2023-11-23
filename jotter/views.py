@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from .serializers import *
 from .models import *
@@ -37,7 +38,7 @@ class SelfUser(generics.ListAPIView):
 
 # ? List all contexts created by the user
 class ListContexts(generics.ListAPIView):
-    serializer_class = ContextSerializer
+    serializer_class = ContextListSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -84,8 +85,13 @@ class CreateContext(generics.CreateAPIView):
 @api_view(['POST'])
 def assoc_class_add(request, context_id, class_id):
     pupil_class = PupilClass.objects.get(id=class_id)
-    pupil_class.contexts.add(context_id)
-    return Response({ "message": f"Context {Context.objects.get(id=context_id)} assigned to class {pupil_class}" })
+    context = Context.objects.get(id=context_id)
+    pupil_class.contexts.add(context)
+
+    serializer = PupilClassSerializer(pupil_class)
+    serialized_data = serializer.data
+
+    return Response({ "message": f"Context {Context.objects.get(id=context_id)} assigned to class {pupil_class}", "pupil_class": serialized_data })
 
 @api_view(['DELETE'])
 def assoc_class_remove(request, context_id, class_id):
@@ -131,6 +137,14 @@ class SingleImage(generics.RetrieveUpdateDestroyAPIView):
 
 # ! Class-Related Views
 
+class ClassList(generics.ListAPIView):
+    serializer_class = PupilClassSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return PupilClass.objects.filter(teacher=user)
+
 class CreatePupilClass(generics.CreateAPIView):
     queryset = PupilClass.objects.all()
     serializer_class = PupilClassSerializer
@@ -164,13 +178,8 @@ class CreateJotter(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        # Extract context_id from the request data
         context_id = self.request.data.get('context')
-
-        # Fetch the Context instance based on the provided context_id
         context_instance = Context.objects.get(pk=context_id)
-
-        # Set the author from the request's user and the fetched context
         serializer.save(author=self.request.user, context=context_instance, complete=False)
 
 class SingleJotter(generics.RetrieveUpdateDestroyAPIView):
@@ -202,11 +211,31 @@ class ListPupilJotters(generics.ListAPIView):
         pupil = self.context['request'].parser_context['kwargs']['pupil_id']
         return Jotter.objects.filter(author=pupil, complete=True)
     
-class ListContextJotters(generics.ListAPIView):
-    serializer_class = JotterSerializer
+class ListClassContextJotters(generics.ListAPIView):
+    serializer_class = JotterListSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        context = self.context['request'].parser_context['kwargs']['context_id']
-        pupil_class = self.context['request'].parser_context['kwargs']['class_id']
-        return Jotter.objects.filter(context=context, complete=True)
+        context_id = self.kwargs.get('context_id')
+        pupil_class_id = self.kwargs.get('class_id')
+        queryset = Jotter.objects.filter(
+            Q(context_id=context_id) &
+            Q(complete=True) &
+            Q(author__pupil_classes__id=pupil_class_id)
+        ).order_by('author__first_name')
+
+        return queryset
+
+class ListContextJotters(generics.ListAPIView):
+    serializer_class = JotterListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        context_id = self.kwargs.get('context_id')
+        queryset = Jotter.objects.filter(
+            Q(context_id=context_id) &
+            Q(complete=True)
+        ).order_by('author__pupil_classes__name')
+
+        return queryset
+    

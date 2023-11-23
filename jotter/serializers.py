@@ -13,7 +13,7 @@ class NestedPupilClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PupilClass
-        fields = ['name', 'teacher', 'year_group']
+        fields = ['id', 'name', 'teacher', 'year_group']
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,7 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
     
 class PupilUserSerializer(serializers.ModelSerializer):
-    pupil_classes = 'PupilClassSerializer(many=True)'
+    pupil_classes = NestedPupilClassSerializer(many=True)
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'pupil_classes', 'groups']
@@ -78,14 +78,20 @@ class ContextSerializer(serializers.ModelSerializer):
     class Meta:
         model = Context
         fields = ['id', 'title', 'prompt', 'instructions', 'author', 'wordbanks', 'images', 'assigned_classes']
-    
-    # def update(self, instance, validated_data):
-    #     instance.title = validated_data.get('title', instance.title)
-    #     instance.prompt = validated_data.get('prompt', instance.prompt)
-    #     instance.instructions = validated_data.get('instructions', instance.instructions)
 
-    #     instance.save()
-    #     return instance
+class PupilClassListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PupilClass
+        fields = ['id', 'name', 'year_group']
+
+class ContextListSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField()
+    images = serializers.StringRelatedField(many=True)
+    assigned_classes = PupilClassListSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Context
+        fields = ['id', 'title', 'author', 'images', 'assigned_classes']
 
 class PupilClassSerializer(serializers.ModelSerializer):
     teacher = UserSerializer(read_only=True)
@@ -94,7 +100,7 @@ class PupilClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PupilClass
-        fields = ['name', 'teacher', 'year_group', 'access_key', 'pupils', 'contexts']
+        fields = ['id', 'name', 'teacher', 'year_group', 'access_key', 'pupils', 'contexts']
         extra_kwargs = {'access_key': {'required': False}}
 
     def create(self, validated_data):
@@ -104,7 +110,7 @@ class PupilClassSerializer(serializers.ModelSerializer):
         pupil_class.save()
 
         return pupil_class
-        
+
 class JotterSerializer(serializers.ModelSerializer):
     author = PupilUserSerializer(read_only=True)
     context = ContextSerializer(read_only=True)
@@ -113,3 +119,10 @@ class JotterSerializer(serializers.ModelSerializer):
         model = Jotter
         fields = '__all__'
 
+class JotterListSerializer(serializers.ModelSerializer):
+    author = PupilUserSerializer(read_only=True)
+    context = serializers.StringRelatedField()
+
+    class Meta:
+        model = Jotter
+        fields = ['id', 'author', 'context']

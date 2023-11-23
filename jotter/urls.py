@@ -21,6 +21,7 @@ urlpatterns = [
     path('contexts/image/create/', views.CreateImage.as_view()),
     path('contexts/image/<int:pk>/', views.SingleImage.as_view()),
     # Class Endpoints
+    path('class/', views.ClassList.as_view()),
     path('class/create/', views.CreatePupilClass.as_view()),
     path('class/<int:pk>/', views.SingleClass.as_view()),
     path('class/join/', views.join_class),
@@ -32,5 +33,6 @@ urlpatterns = [
     path('jotter/incomplete/', views.ListOwnIncompleteJotters.as_view()),
     path('jotter/complete/', views.ListOwnCompleteJotters.as_view()),
     path('jotter/pupil/<int:pupil_id>/', views.ListPupilJotters.as_view()),
-    path('jotter/context/<int:context_id>/class/<int:class_id>/', views.ListContextJotters.as_view())
+    path('jotter/context/<int:context_id>/class/<int:class_id>/', views.ListClassContextJotters.as_view()),
+    path('jotter/context/<int:context_id>/', views.ListContextJotters.as_view()),
 ]

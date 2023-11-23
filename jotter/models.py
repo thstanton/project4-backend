@@ -25,6 +25,9 @@ class Image(models.Model):
     url = models.CharField(max_length=200)
     context = models.ForeignKey(Context, related_name='images', on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.url
+
 class Jotter(models.Model):
     context = models.ForeignKey(Context, on_delete=models.CASCADE)
     body = models.TextField(blank=True, null=True)
