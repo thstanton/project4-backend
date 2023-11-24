@@ -126,12 +126,12 @@ class SingleWord(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 class CreateImage(generics.CreateAPIView):
-    queryset = Word.objects.all()
+    queryset = Image.objects.all()
     serializer_class = ImageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 class SingleImage(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Word.objects.all()
+    queryset = Image.objects.all()
     serializer_class = ImageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
