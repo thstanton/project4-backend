@@ -10,15 +10,13 @@ Jotter is my final General Assembly Software Engineering Immersive Course projec
 
 ## Getting Started/Code Installation
 
-The front-end code is accessible through this repo: [https://github.com/thstanton/project4-frontend](https://github.com/thstanton/project4-frontend)
-Run ``npm install`` to install dependencies
-Run ``npm start`` to start local server
+- The front-end code is accessible through this repo: [https://github.com/thstanton/project4-frontend](https://github.com/thstanton/project4-frontend)
+- Run ``npm install`` to install dependencies
+- Run ``npm start`` to start local server
 
-The back-end code is accessible through this repo:
-
-[https://github.com/thstanton/project4-backend](https://github.com/thstanton/project4-backend)
-Run ``pip install -r requirements.txt`` to install dependencies
-Run ``python3 manage.py runserver`` to start local server
+- The back-end code is accessible through this repo: [https://github.com/thstanton/project4-backend](https://github.com/thstanton/project4-backend)
+- Run ``pip install -r requirements.txt`` to install dependencies
+- Run ``python3 manage.py runserver`` to start local server
 
 ## Timeframe & Working Team
 
@@ -27,53 +25,40 @@ This project was completed solo, in 1 week.
 ## Technologies Used
 
 <table>
-  <tr>
-   <td><strong>Back End</strong>
-<ul>
-
-<li>Python
-
-<li>Django
-
-<li>Django Rest Framework
-
-<li>PostgreSQL
-
-<li>SimpleJWT
-</li>
-</ul>
-   </td>
-   <td><strong>Front End</strong>
-<ul>
-
-<li>JavaScript
-
-<li>NodeJS
-
-<li>React
-
-<li>React Router
-
-<li>Tailwind CSS
-
-<li>Next UI
-</li>
-</ul>
-   </td>
-   <td><strong>Development Tools</strong>
-<ul>
-
-<li>VS Code
-
-<li>Chrome DevTools
-
-<li>Postman
-
-<li>GIT/GitHub
-</li>
-</ul>
-   </td>
-  </tr>
+    <tr>
+        <th>Back End</th>
+        <th>Front End</th>
+        <th>Development Tools</th>
+    </tr>
+    <tr>
+        <td>
+            <ul>
+                <li>Python</li>
+                <li>Django</li>
+                <li>Django Rest Framework</li>
+                <li>PostgreSQL</li>
+                <li>SimpleJWT</li>
+            </ul>
+        </td>
+        <td>
+            <ul>
+                <li>JavaScript</li>
+                <li>NodeJS</li>
+                <li>React</li>
+                <li>React Router</li>
+                <li>Tailwind CSS</li>
+                <li>Next UI</li>
+            </ul>
+        </td>
+        <td>
+            <ul>
+                <li>VS Code</li>
+                <li>Chrome DevTools</li>
+                <li>Postman</li>
+                <li>GIT/GitHub</li>
+            </ul>
+        </td>
+    </tr>
 </table>
 
 ## Brief
